@@ -1,0 +1,16 @@
+# docker-compose -f ./docker-compose.yml up -d
+version : "3.9"
+name: 'saft'
+services :
+ webservice :
+  container_name: saftweb
+  image : saft_web_java:latest
+  ports :
+    - 8080:8080
+  networks:
+    saft-network :
+      ipv4_address : 172.27.0.3
+networks:
+  saft-network : 
+    external :
+      name : saft-network 
