@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local
+    active: test
   datasource:
     url: jdbc:h2:tcp://localhost/~/saft
     username: sa
@@ -12,7 +12,7 @@ spring:
       ddl-auto: create # create -> 매번 새로 생성 |  create-drop -> 생성 후 drop으로 클리어 | none -> 데이터 삭제 안한다
     properties:
       hibernate:
-#        show_sql: true
+        #        show_sql: true
         format_sql: true
         use_sql_comments: true
 

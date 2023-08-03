@@ -1,13 +1,13 @@
-package com.darts.saft;
+package com.saft.back;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SaftApplication {
+public class BackApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SaftApplication.class, args);
+		SpringApplication.run(BackApplication.class, args);
 	}
 
 }

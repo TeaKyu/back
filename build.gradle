@@ -1,11 +1,19 @@
+buildscript {
+	ext {
+		queryDslVersion = "5.0.0"
+	}
+}
+
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.1.1'
-	id 'io.spring.dependency-management' version '1.1.0'
+	id 'org.springframework.boot' version '2.7.14'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	//querydsl 추가
+	id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
 	id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
 
-group = 'com.darts'
+group = 'com.saft'
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -16,32 +24,118 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+	// config 추가
+	asciidoctorExtensions
 }
 
 repositories {
 	mavenCentral()
 }
 
-ext {
-	set('snippetsDir', file("build/generated-snippets"))
-}
-
 dependencies {
-//	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
-//	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+	runtimeOnly 'com.h2database:h2'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+
+	//querydsl 추가
+	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
+	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}"
+
+	//파라미터 확인 라이브러리
+	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.8'
+
+	// MapStruct
+	implementation 'org.mapstruct:mapstruct:1.4.2.Final'
+	annotationProcessor "org.mapstruct:mapstruct-processor:1.4.2.Final"
+	annotationProcessor(
+			'org.projectlombok:lombok',
+			'org.projectlombok:lombok-mapstruct-binding:0.1.0'
+	)
+
+	// 추가 adoc 파일들을 연산으로 사용할 수 있게 해주며, html로 export할 수 있게 해줌
+	asciidoctorExtensions "org.springframework.restdocs:spring-restdocs-asciidoctor"
+	// restdocs 부분 추가
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {
-	outputs.dir snippetsDir
 	useJUnitPlatform()
 }
 
-tasks.named('asciidoctor') {
+//querydsl 추가 시작
+def querydslDir = "$buildDir/generated/querydsl"
+
+querydsl {
+	jpa = true
+	querydslSourcesDir = querydslDir
+}
+sourceSets {
+	main.java.srcDir querydslDir
+}
+configurations {ccc
+	querydsl.extendsFrom compileClasspath
+}
+compileQuerydsl {
+	options.annotationProcessorPath = configurations.querydsl
+}
+//querydsl 추가 끝
+
+
+
+
+
+
+
+//restDocs
+// 변수 선언
+ext {
+	snippetsDir = file('build/generated-snippets')
+}
+// 기존에 만들어진 adoc 삭제
+asciidoctor.doFirst {
+	delete file('src/main/resources/static/docs')
+}
+
+// 생성물이 snippetsDir에 생성됩니다.
+test {
+	useJUnitPlatform()
+	outputs.dir snippetsDir
+}
+
+// asciidoctor 설정입니다. dependsOn은 Task가 의존하는 것을 명시합니다.
+// 따라서 위에만든 test Task를 의존합니다.
+asciidoctor {
 	inputs.dir snippetsDir
 	dependsOn test
+}
+
+
+
+// bootjar과 관련된 설정이며, 스니펫을 이용해 문서 작성 후,
+// build - docs - asciidoc 하위에 생기는 html 파일을 BOOT-INF/classes/static/docs로 복사해줍니다.
+bootJar {
+	dependsOn asciidoctor
+	copy {
+		from "${asciidoctor.outputDir}"
+		into 'BOOT-INF/classes/static/docs'
+	}
+}
+
+
+// asciidoctor를 의존하고, from file 경로에 있는 파일을 into file로 복사를 진행합니다.
+task copyDocument(type: Copy) {
+	dependsOn asciidoctor
+	from file("build/docs/asciidoc")
+	into file("src/main/resources/static/docs")
+}
+
+
+// build시 copyDocument를 의존합니다.
+build {
+	dependsOn copyDocument
 }
