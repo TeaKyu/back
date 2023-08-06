@@ -77,7 +77,7 @@ querydsl {
 sourceSets {
 	main.java.srcDir querydslDir
 }
-configurations {ccc
+configurations {
 	querydsl.extendsFrom compileClasspath
 }
 compileQuerydsl {
@@ -122,7 +122,7 @@ bootJar {
 	dependsOn asciidoctor
 	copy {
 		from "${asciidoctor.outputDir}"
-		into 'BOOT-INF/classes/static/docs'
+		into 'src/main/resources/static/docs'
 	}
 }
 

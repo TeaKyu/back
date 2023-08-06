@@ -2,70 +2,66 @@ package com.saft.back.member.interfaces;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saft.back.entity.MemberDtoMockGenerator;
-import com.saft.back.member.entity.Member;
 import com.saft.back.member.facade.MemberFacade;
-import com.saft.back.member.service.MemberService;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
+import org.springframework.boot.test.autoconfigure.restdocs.RestDocsAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.operation.preprocess.Preprocessors;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-/*
-@AutoConfigureMockMvc
-@Transactional
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 
- */
 @WebMvcTest(
         controllers = {
                 MemberController.class
         })
+@AutoConfigureRestDocs//(outputDir = "target/snippets")
+@Import(RestDocsAutoConfiguration.class)
 public class MemberControllerTest {
 
-    @InjectMocks
-    private MemberController memberController;
 
-    @MockBean
-    private MemberFacade memberFacade;
-
-    @MockBean
-    private MemberDto MemberDto;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockBean
     private MemberDtoMapper memberDtoMapper;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    @MockBean
+    private MemberFacade memberFacade;
 
     @Autowired
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     MockMvc mockMvc;
 
     @Test
-    public void memberSave() throws Exception {
+    public void member_저장() throws Exception {
         MemberDto.RegisterMemberRequest memberRequest = MemberDtoMockGenerator.memberRequset();
-
-        //MultiValueMap<String, String> convert = MemberDtoMockGenerator.convert(objectMapper, memberRequest);
-
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/member/insertMember")
-                        //.params(s)
-                        //.accept(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post("/api/v1/member/insertMember")
                         .content(objectMapper.writeValueAsString(memberRequest))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andDo(MockMvcResultHandlers.print());
-
+                .andExpect(status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andDo(document("memberSave",
+                                Preprocessors.preprocessRequest(Preprocessors.prettyPrint()),
+                                Preprocessors.preprocessResponse(Preprocessors.prettyPrint()),
+                        responseFields(
+                                fieldWithPath("result").description("Description for field1"),
+                                fieldWithPath("data").description("Description for field2"),
+                                fieldWithPath("message").description("Description for field2"),
+                                fieldWithPath("errorCode").description("Description for field2")
+                        )
+                ));
     }
+
 }

@@ -27,7 +27,7 @@ public interface MemberDtoMockGenerator {
     }
 
 
-    public static MultiValueMap<String, String> convert(ObjectMapper objectMapper, Object dto) { // (2)
+    static MultiValueMap<String, String> convert(ObjectMapper objectMapper, Object dto) { // (2)
         try {
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
             Map<String, String> map = objectMapper.convertValue(dto, new TypeReference<Map<String, String>>() {}); // (3)

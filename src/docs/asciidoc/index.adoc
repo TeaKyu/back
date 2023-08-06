@@ -1,19 +1,33 @@
+= SAFT REST API Guide
+;
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+:operation-curl-request-title: Example request
+:operation-http-response-title: Example response
+
 ifndef::snippets[]
 :snippets: ./build/generated-snippets
 endif::[]
 
-== REQUEST
+[[Member_API]]
+== Member API
 
-include::{snippets}/members/http-request.adoc[]
+[[Member_생성]]
+=== Member 생성
+요청값
+include::{snippets}/memberSave/http-request.adoc[]
+성공
+include::{snippets}/memberSave/http-response.adoc[]
+실패
+include::{snippets}/memberSave/response-fields.adoc[]
 
-== RESPONSE
 
-include::{snippets}/members/http-response.adoc[]
-
-== RESPONSE HEADER
-
-include::{snippets}/members/response-headers.adoc[]
-
-== RESPONSE FIEDL
-
-include::{snippets}/members/response-fields.adoc[]
+[[Member_생성]]
+=== Member 생성
+include::{snippets}/memberSave/http-request.adoc[]
+include::{snippets}/memberSave/http-response.adoc[]
+include::{snippets}/memberSave/response-fields.adoc[]
